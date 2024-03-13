@@ -1,1 +1,86 @@
+name: slack_github_action
 
+on:
+  push:
+    branches:
+      - jfrog_artifacts
+
+jobs:
+  slack_notifier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Install JFrog CLI
+        run: |
+          curl -fL https://getcli.jfrog.io | sh
+          sudo mv jfrog /usr/local/bin/  # Assuming jfrog is in the current directory
+
+      - name: Build Maven project
+        run: |
+          mvn clean install
+          export MAVEN_EXIT_CODE=$?
+
+      - name: Generate code coverage report
+        run: |
+          mvn jacoco:report
+
+      - name: Publish code coverage result
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage
+          path: target/site/jacoco/index.html
+          
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=shadabmalikshah
+            -Dsonar.projectKey=shadabmalikshah_Github_ActionPOC_10NEw
+            -Dsonar.sources=.
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.java.binaries=./target/classes
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Set JFrog CLI Path
+        run: |
+          export PATH=$PATH:/usr/local/bin
+
+      - name: Push Artifacts to JFrog
+        run: |
+                  jfrog rt u target/*.jar artifacts_pocs-libs-snapshot-local/ --url=https://shadabjfrog.jfrog.io/artifactory/githubactionpoc10-libs-snapshot-local/ --access-token=eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJvbnpIRjl3bXRGZE1jaGdLbEdEbEcxRFhyUGs2RlpxSDIwRWMwWlo2V3FBIn0.eyJzdWIiOiJqZmFjQDAxaHIyeGIyYmdmeTA4MTl3NnRwY3owOWV4L3VzZXJzL3NoYWRhYm1hbGlrc0BjeWJhZ2UuY29tIiwic2NwIjoiYXBwbGllZC1wZXJtaXNzaW9ucy9hZG1pbiIsImF1ZCI6IipAKiIsImlzcyI6ImpmZmVAMDFocjJ4YjJiZ2Z5MDgxOXc2dHBjejA5ZXgiLCJpYXQiOjE3MDk1NTIwMDgsImp0aSI6IjkyYmNlOGVmLWQzNDMtNGU3ZS05ZDRkLTFmZDVkYzM2YWY4ZSJ9.g_UzURwmOLEfVUgBbNzx1lwHLXbMNWqO2CJ585n37r9IYtiEFQtrzJ_MfiO7xq57pFsYZfFvjAf6_EU0Xd__0Hc7s1SQs_TIY0lXVwAC1Aro6iHfIaD8fmDoPlYb2jJ0D7Fcv2g2KfbQbC3hbAdFFfCKQ-O1fjSiNysAQy1kMCnu2aR_mtvAapUhXS0sAqS3Qo0f8UHJI0A6eNkmpPY9AgKgQ37cqRqhFmeqsY5xd0SeYcmoXLHeE6KQMdo3l03DlQ1LslTUnnlOt9FJpyOx7YCa3RHtd0YNZuNJHo3Zf3uPlECVuxUVlM04pWA0nFuSWWLaccCU5_cuGq-Sb8dKtw
+
+
+     
+      - name: Send notification on Slack using Webhooks - Success
+        if: ${{ success() }}
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Maven project built successfully."
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Send notification on Slack using Webhooks - Failure
+        if: ${{ failure() }}
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Maven build failed. Please check the build logs for details."
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
