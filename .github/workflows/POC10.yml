@@ -29,29 +29,29 @@ jobs:
           mvn clean install
           export MAVEN_EXIT_CODE=$?
 
-      # - name: Generate code coverage report
-      #   run: |
-      #     mvn jacoco:report
+      - name: Generate code coverage report
+        run: |
+          mvn jacoco:report
 
-      # - name: Publish code coverage result
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: code-coverage
-      #     path: target/site/jacoco/index.html
+      - name: Publish code coverage result
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage
+          path: target/site/jacoco/index.html
           
-      # - name: SonarQube Scan
-      #   uses: sonarsource/sonarqube-scan-action@v2
-      #   with:
-      #     projectBaseDir: .
-      #     args: >
-      #       -Dsonar.organization=shadabmalikshah
-      #       -Dsonar.projectKey=shadabmalikshah_Github_ActionPOC_10NEw
-      #       -Dsonar.sources=.
-      #       -Dsonar.host.url=https://sonarcloud.io
-      #       -Dsonar.java.binaries=./target/classes
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=shadabmalikshah
+            -Dsonar.projectKey=shadabmalikshah_Github_ActionPOC_10NEw
+            -Dsonar.sources=.
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.java.binaries=./target/classes
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Set JFrog CLI Path
         run: |
