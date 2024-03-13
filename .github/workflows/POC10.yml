@@ -29,29 +29,29 @@ jobs:
           mvn clean install
           export MAVEN_EXIT_CODE=$?
 
-      - name: Generate code coverage report
-        run: |
-          mvn jacoco:report
+      # - name: Generate code coverage report
+      #   run: |
+      #     mvn jacoco:report
 
-      - name: Publish code coverage result
-        uses: actions/upload-artifact@v2
-        with:
-          name: code-coverage
-          path: target/site/jacoco/index.html
+      # - name: Publish code coverage result
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: code-coverage
+      #     path: target/site/jacoco/index.html
           
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v2
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=shadabmalikshah
-            -Dsonar.projectKey=shadabmalikshah_Github_ActionPOC_10NEw
-            -Dsonar.sources=.
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.java.binaries=./target/classes
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # - name: SonarQube Scan
+      #   uses: sonarsource/sonarqube-scan-action@v2
+      #   with:
+      #     projectBaseDir: .
+      #     args: >
+      #       -Dsonar.organization=shadabmalikshah
+      #       -Dsonar.projectKey=shadabmalikshah_Github_ActionPOC_10NEw
+      #       -Dsonar.sources=.
+      #       -Dsonar.host.url=https://sonarcloud.io
+      #       -Dsonar.java.binaries=./target/classes
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Set JFrog CLI Path
         run: |
@@ -59,7 +59,7 @@ jobs:
 
       - name: Push Artifacts to JFrog
         run: |
-                  jfrog rt u target/*.jar artifacts_pocs-libs-snapshot-local/ --url=https://shadabjfrog.jfrog.io/artifactory/githubactionpoc10-libs-snapshot-local/ --access-token=${{ secrets.JFROG_TOKEN }}
+                  jfrog rt u target/*.jar githubactionpoc10-libs-snapshot-local/ --url=https://shadabjfrog.jfrog.io/artifactory/githubactionpoc10-libs-snapshot-local/ --access-token=eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJvbnpIRjl3bXRGZE1jaGdLbEdEbEcxRFhyUGs2RlpxSDIwRWMwWlo2V3FBIn0.eyJzdWIiOiJqZmFjQDAxaHIyeGIyYmdmeTA4MTl3NnRwY3owOWV4L3VzZXJzL3NoYWRhYm1hbGlrc0BjeWJhZ2UuY29tIiwic2NwIjoiYXBwbGllZC1wZXJtaXNzaW9ucy9hZG1pbiIsImF1ZCI6IipAKiIsImlzcyI6ImpmZmVAMDAwIiwiaWF0IjoxNzEwMzA4Mzg5LCJqdGkiOiIxNWI5MTIyYy0yZjMwLTQyZGQtOGE1Mi0xMDFkODQxZjBkNzEifQ.kskqOfNxAAMogv-W2_vlS0om_8qYABuHmHhZviVTw0-oTgt5WiSDsWNMBg_5l36JIfz52YY--E-LhXvxQAdJpa6js35tS7uWoN4kgJEZNEEiiiMU2f5i6ziE5IA8MOjlZFTYpV-OJwpo4uNJ8c1cB_NZ8yRZYussJJ4RNJrnI8j-FkTsoBGSmsaZNw7IGLt7mlPpelFItgW4jWFaBnoejrTIxT6qaYs0rzGoNoZxM8EWv8xvYt8V6E8Vr1Mn43llMRlBck2YQtmWnyW5zFSDc7AyWADb-m9cNVk_gSy-q1CJuMb6wLfla8q6vqURnJonz40bi3O5OPiUWUEvhJjSsA
 
 
      
